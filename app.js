@@ -8,12 +8,10 @@ const { graphqlHTTP } = require("express-graphql");
 const schema = require("./schema");
 const root = require("./resolvers");
 const pool = require("./db");
-const { redisClient, connectRedis } = require("./cache");
 const { parsePagination, parseSort } = require("./middlewares/query-parser");
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // ─── Custom Middleware ──────────────────────────────────────────────────────
 function requireJson(req, res, next) {
@@ -409,20 +407,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-
-connectRedis()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server กำลังทำงานที่พอร์ต ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("เชื่อมต่อ Redis ไม่สำเร็จ เซิร์ฟเวอร์จะไม่เริ่มทำงาน:", err);
-    process.exit(1);
-  });
-
-
-// ─── Start server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`Server กำลังทำงานที่ http://localhost:${PORT} (${process.env.NODE_ENV})`);
-});
+module.exports = app;
