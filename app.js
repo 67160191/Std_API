@@ -151,7 +151,7 @@ app.post("/api/v1/students", async (req, res, next) => {
     });
   }
 
- try {
+  try {
     const [result] = await pool.query(
       "INSERT INTO students (name, major, email) VALUES (?, ?, ?)",
       [name, major, email],

@@ -1,7 +1,19 @@
 {
   "name": "student-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "REST API สำหรับจัดการข้อมูลนักศึกษา พัฒนาด้วย Node.js และ Express.js",
+  "keywords": [],
+  "homepage": "https://github.com/67160191/Std_API#readme",
+  "bugs": {
+    "url": "https://github.com/67160191/Std_API/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/67160191/Std_API.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,10 +22,6 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
