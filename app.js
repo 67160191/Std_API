@@ -135,6 +135,9 @@ v2Router.get("/students", async (req, res, next) => {
 
 app.use("/api/v2", v2Router);
 
+const studentsRouter = require("./routes/students");
+app.use("/api/v1/students", studentsRouter);
+
 
 app.get("/api/v1/students/:id", async (req, res, next) => {
   try {
