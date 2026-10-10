@@ -1,0 +1,778 @@
+openapi: 3.0.3
+info:
+  title: Student API
+  description: API สำหรับจัดการข้อมูลนิสิต พัฒนาในรายวิชา 88736065
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+
+tags:
+  - name: Auth
+    description: ระบบยืนยันตัวตนและจัดการบัญชีผู้ใช้
+  - name: Students
+    description: ระบบจัดการข้อมูลนักศึกษา (CRUD และการลงทะเบียน)
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: สมัครสมาชิกใหม่
+      description: ลงทะเบียนผู้ใช้งานใหม่ในระบบ (กำหนดสิทธิ์ role เริ่มต้นเป็น student)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: สมัครสมาชิกสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: ข้อมูลไม่ครบถ้วนหรือไม่ถูกต้อง (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: กรุณาระบุ email และ password
+        '409':
+          description: อีเมลนี้มีอยู่ในระบบแล้ว (DUPLICATE_EMAIL)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: DUPLICATE_EMAIL
+                  message: อีเมลนี้มีอยู่ในระบบแล้ว
+        '415':
+          description: ไม่ได้ส่ง Content-Type เป็น application/json (UNSUPPORTED_MEDIA_TYPE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: กรุณาส่งข้อมูลในรูปแบบ application/json
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: เข้าสู่ระบบ
+      description: ตรวจสอบความถูกต้องของ email และ password แล้วคืน JWT Bearer Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: เข้าสู่ระบบสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: ข้อมูลไม่ครบถ้วนหรือไม่ถูกต้อง (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: กรุณาระบุ email และ password
+        '401':
+          description: อีเมลหรือรหัสผ่านไม่ถูกต้อง (INVALID_CREDENTIALS)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: อีเมลหรือรหัสผ่านไม่ถูกต้อง
+        '415':
+          description: ไม่ได้ส่ง Content-Type เป็น application/json (UNSUPPORTED_MEDIA_TYPE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: กรุณาส่งข้อมูลในรูปแบบ application/json
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags:
+        - Auth
+      summary: ดูข้อมูลผู้ใช้งานปัจจุบัน
+      description: ดึงข้อมูลบัญชีผู้ใช้ที่ล็อกอินอยู่จาก Token ใน Header Authorization
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: ไม่พบ Token หรือ Token ไม่ถูกต้อง / หมดอายุ (NO_TOKEN / INVALID_TOKEN)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                noToken:
+                  summary: ไม่ได้แนบ Authorization Header
+                  value:
+                    error:
+                      code: NO_TOKEN
+                      message: กรุณาเข้าสู่ระบบก่อนใช้งาน
+                invalidToken:
+                  summary: Token ไม่ถูกต้องหรือหมดอายุ
+                  value:
+                    error:
+                      code: INVALID_TOKEN
+                      message: Token ไม่ถูกต้องหรือหมดอายุ
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /students:
+    get:
+      tags:
+        - Students
+      summary: ดึงรายชื่อนักศึกษาทั้งหมด
+      description: คืนรายการนักศึกษาทั้งหมด รองรับการแบ่งหน้า (Pagination), การกรองตามสาขาวิชา (major), และการเรียงลำดับ (Sorting)
+      parameters:
+        - name: page
+          in: query
+          description: หมายเลขหน้า (Pagination) เริ่มต้นที่ 1
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          example: 1
+        - name: limit
+          in: query
+          description: จำนวนรายการต่อหน้า (Pagination) สูงสุด 100
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+          example: 10
+        - name: major
+          in: query
+          description: กรองตามสาขาวิชา (เช่น วิทยาการคอมพิวเตอร์, เทคโนโลยีสารสนเทศ)
+          required: false
+          schema:
+            type: string
+          example: วิทยาการคอมพิวเตอร์
+        - name: sort
+          in: query
+          description: ฟิลด์ที่ใช้จัดเรียงข้อมูล
+          required: false
+          schema:
+            type: string
+            enum: [id, name, major, created_at]
+            default: id
+          example: id
+        - name: order
+          in: query
+          description: ทิศทางการจัดเรียงลำดับ
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+          example: asc
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentListResponse'
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Students
+      summary: เพิ่มข้อมูลนักศึกษาใหม่
+      description: เพิ่มระเบียนนักศึกษาใหม่เข้าสู่ฐานข้อมูล
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudentRequest'
+      responses:
+        '201':
+          description: เพิ่มข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentCreatedResponse'
+        '400':
+          description: ข้อมูลไม่ครบถ้วน (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: กรุณาระบุข้อมูลให้ครบถ้วน
+        '409':
+          description: อีเมลนี้มีอยู่ในระบบแล้ว (DUPLICATE_EMAIL)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: DUPLICATE_EMAIL
+                  message: อีเมลนี้มีอยู่ในระบบแล้ว
+        '415':
+          description: ไม่ได้ส่ง Content-Type เป็น application/json (UNSUPPORTED_MEDIA_TYPE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: กรุณาส่งข้อมูลในรูปแบบ application/json
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /students/{id}:
+    get:
+      tags:
+        - Students
+      summary: ดึงข้อมูลนักศึกษารายบุคคล
+      description: ดึงข้อมูลนักศึกษาตาม id ที่ระบุ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: รหัสประจำตัวนักศึกษา
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentSingleResponse'
+        '404':
+          description: ไม่พบข้อมูลนักศึกษา (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: ไม่พบข้อมูลนักศึกษา
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Students
+      summary: แก้ไขข้อมูลนักศึกษาทั้งระเบียน
+      description: แก้ไขข้อมูล name และ major ของนักศึกษาตาม id ที่ระบุ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: รหัสประจำตัวนักศึกษา
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentRequest'
+      responses:
+        '200':
+          description: แก้ไขข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentSingleResponse'
+        '400':
+          description: ข้อมูลไม่ครบถ้วน (VALIDATION_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: กรุณาระบุ name และ major ให้ครบถ้วน
+        '404':
+          description: ไม่พบข้อมูลนักศึกษา (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: ไม่พบข้อมูลนักศึกษา
+        '415':
+          description: ไม่ได้ส่ง Content-Type เป็น application/json (UNSUPPORTED_MEDIA_TYPE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: กรุณาส่งข้อมูลในรูปแบบ application/json
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Students
+      summary: ลบข้อมูลนักศึกษา
+      description: ลบข้อมูลนักศึกษาตาม id ที่ระบุ (ต้องเข้าสู่ระบบและมีบทบาท role 'admin' เท่านั้น - RBAC)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: รหัสประจำตัวนักศึกษา
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: ลบข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: ลบข้อมูลสำเร็จ
+        '401':
+          description: ไม่ได้ระบุ Token หรือ Token ไม่ถูกต้อง (NO_TOKEN / INVALID_TOKEN)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                noToken:
+                  summary: ไม่พบ Token
+                  value:
+                    error:
+                      code: NO_TOKEN
+                      message: กรุณาเข้าสู่ระบบก่อนใช้งาน
+                invalidToken:
+                  summary: Token ไม่ถูกต้องหรือหมดอายุ
+                  value:
+                    error:
+                      code: INVALID_TOKEN
+                      message: Token ไม่ถูกต้องหรือหมดอายุ
+        '403':
+          description: ไม่มีสิทธิ์เข้าถึงทรัพยากรนี้ - ต้องการสิทธิ์ admin (FORBIDDEN)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: FORBIDDEN
+                  message: คุณไม่มีสิทธิ์เข้าถึงทรัพยากรนี้
+        '404':
+          description: ไม่พบข้อมูลนิสิต (NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: ไม่พบข้อมูลนิสิต
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /students/{id}/enrollments:
+    post:
+      tags:
+        - Students
+      summary: ลงทะเบียนรายวิชา
+      description: บันทึกการลงทะเบียนรายวิชาของนักศึกษา พร้อมตัดจำนวนที่นั่งว่างในรายวิชา
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: รหัสประจำตัวนักศึกษา
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentRequest'
+      responses:
+        '201':
+          description: ลงทะเบียนสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+              example:
+                message: ลงทะเบียนสำเร็จ
+        '404':
+          description: ไม่พบรายวิชาที่ระบุ (COURSE_NOT_FOUND)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: COURSE_NOT_FOUND
+                  message: ไม่พบรายวิชาที่ระบุ
+        '409':
+          description: ที่นั่งเต็มหรือลงทะเบียนรายวิชานี้ไปแล้ว (SEAT_FULL / ALREADY_ENROLLED)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                seatFull:
+                  summary: ที่นั่งเต็มแล้ว
+                  value:
+                    error:
+                      code: SEAT_FULL
+                      message: ที่นั่งเต็มแล้ว
+                alreadyEnrolled:
+                  summary: นักศึกษาลงทะเบียนรายวิชานี้ไปแล้ว
+                  value:
+                    error:
+                      code: ALREADY_ENROLLED
+                      message: นักศึกษาลงทะเบียนรายวิชานี้ไปแล้ว
+        '415':
+          description: ไม่ได้ส่ง Content-Type เป็น application/json (UNSUPPORTED_MEDIA_TYPE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: กรุณาส่งข้อมูลในรูปแบบ application/json
+        '500':
+          description: เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ (INTERNAL_SERVER_ERROR)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: กรุณาระบุข้อมูลให้ครบถ้วน
+
+    Student:
+      type: object
+      required:
+        - id
+        - name
+        - major
+        - email
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: สมชาย ใจดี
+        major:
+          type: string
+          example: วิทยาการคอมพิวเตอร์
+        email:
+          type: string
+          format: email
+          example: somchai@example.com
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-03-29T10:00:00.000Z"
+
+    CreateStudentRequest:
+      type: object
+      required:
+        - name
+        - major
+        - email
+      properties:
+        name:
+          type: string
+          example: สมชาย ใจดี
+        major:
+          type: string
+          example: วิทยาการคอมพิวเตอร์
+        email:
+          type: string
+          format: email
+          example: somchai@example.com
+
+    UpdateStudentRequest:
+      type: object
+      required:
+        - name
+        - major
+      properties:
+        name:
+          type: string
+          example: สมชาย ใจดี
+        major:
+          type: string
+          example: เทคโนโลยีสารสนเทศ
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@example.com
+        password:
+          type: string
+          format: password
+          example: Passw0rd!
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@example.com
+        password:
+          type: string
+          format: password
+          example: Passw0rd!
+
+    EnrollmentRequest:
+      type: object
+      required:
+        - courseId
+      properties:
+        courseId:
+          type: integer
+          example: 101
+
+    PaginationMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 25
+        totalPages:
+          type: integer
+          example: 3
+
+    StudentListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: สำเร็จ
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Student'
+        pagination:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    StudentSingleResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: สำเร็จ
+        data:
+          $ref: '#/components/schemas/Student'
+
+    StudentCreatedResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: เพิ่มข้อมูลสำเร็จ
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: สมชาย ใจดี
+            major:
+              type: string
+              example: วิทยาการคอมพิวเตอร์
+            email:
+              type: string
+              format: email
+              example: somchai@example.com
+
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: สมัครสมาชิกสำเร็จ
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            email:
+              type: string
+              example: student@example.com
+            role:
+              type: string
+              example: student
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: เข้าสู่ระบบสำเร็จ
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    UserProfileResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: สำเร็จ
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            email:
+              type: string
+              example: student@example.com
+            role:
+              type: string
+              example: student
+            iat:
+              type: integer
+              example: 1712739600
+            exp:
+              type: integer
+              example: 1712743200
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: ลบข้อมูลสำเร็จ

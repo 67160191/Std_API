@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1790874787815" clover="3.2.0">
-  <project timestamp="1790874787815" name="All files">
-    <metrics statements="231" coveredstatements="175" conditionals="106" coveredconditionals="59" methods="44" coveredmethods="21" elements="381" coveredelements="255" complexity="0" loc="231" ncloc="231" packages="2" files="7" classes="7"/>
+<coverage generated="1791256491686" clover="3.2.0">
+  <project timestamp="1791256491686" name="All files">
+    <metrics statements="231" coveredstatements="174" conditionals="106" coveredconditionals="59" methods="44" coveredmethods="20" elements="381" coveredelements="253" complexity="0" loc="231" ncloc="231" packages="2" files="7" classes="7"/>
     <package name="Std_API">
-      <metrics statements="208" coveredstatements="152" conditionals="90" coveredconditionals="45" methods="39" coveredmethods="16"/>
+      <metrics statements="208" coveredstatements="151" conditionals="90" coveredconditionals="45" methods="39" coveredmethods="15"/>
       <file name="app.js" path="D:\Downloads\Std_API\app.js">
-        <metrics statements="154" coveredstatements="134" conditionals="60" coveredconditionals="45" methods="17" coveredmethods="13"/>
+        <metrics statements="154" coveredstatements="133" conditionals="60" coveredconditionals="45" methods="17" coveredmethods="12"/>
         <line num="1" count="4" type="stmt"/>
         <line num="3" count="4" type="stmt"/>
         <line num="4" count="4" type="stmt"/>
@@ -125,7 +125,7 @@
         <line num="292" count="1" type="stmt"/>
         <line num="294" count="1" type="stmt"/>
         <line num="300" count="4" type="stmt"/>
-        <line num="301" count="1" type="stmt"/>
+        <line num="301" count="0" type="stmt"/>
         <line num="309" count="4" type="stmt"/>
         <line num="311" count="4" type="stmt"/>
         <line num="312" count="9" type="stmt"/>
@@ -134,31 +134,31 @@
         <line num="323" count="7" type="stmt"/>
         <line num="324" count="7" type="stmt"/>
         <line num="325" count="7" type="stmt"/>
-        <line num="330" count="4" type="stmt"/>
-        <line num="335" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="336" count="2" type="stmt"/>
-        <line num="340" count="1" type="stmt"/>
+        <line num="330" count="1" type="stmt"/>
+        <line num="335" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="336" count="1" type="stmt"/>
+        <line num="340" count="5" type="stmt"/>
         <line num="344" count="4" type="stmt"/>
         <line num="345" count="7" type="stmt"/>
         <line num="347" count="7" type="cond" truecount="4" falsecount="0"/>
         <line num="348" count="1" type="stmt"/>
         <line num="356" count="6" type="stmt"/>
         <line num="357" count="6" type="stmt"/>
-        <line num="361" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="362" count="2" type="stmt"/>
-        <line num="370" count="3" type="stmt"/>
-        <line num="371" count="3" type="stmt"/>
-        <line num="373" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="361" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="362" count="1" type="stmt"/>
+        <line num="370" count="2" type="stmt"/>
+        <line num="371" count="2" type="stmt"/>
+        <line num="373" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="374" count="1" type="stmt"/>
-        <line num="382" count="2" type="stmt"/>
-        <line num="383" count="2" type="stmt"/>
-        <line num="385" count="1" type="stmt"/>
+        <line num="382" count="1" type="stmt"/>
+        <line num="383" count="1" type="stmt"/>
+        <line num="385" count="3" type="stmt"/>
         <line num="390" count="4" type="stmt"/>
         <line num="391" count="1" type="stmt"/>
         <line num="397" count="4" type="stmt"/>
-        <line num="398" count="10" type="stmt"/>
-        <line num="401" count="10" type="cond" truecount="3" falsecount="0"/>
-        <line num="402" count="10" type="stmt"/>
+        <line num="398" count="16" type="stmt"/>
+        <line num="401" count="16" type="cond" truecount="3" falsecount="0"/>
+        <line num="402" count="16" type="stmt"/>
         <line num="410" count="4" type="stmt"/>
       </file>
       <file name="auth-helpers.js" path="D:\Downloads\Std_API\auth-helpers.js">
@@ -167,8 +167,8 @@
         <line num="2" count="5" type="stmt"/>
         <line num="4" count="5" type="stmt"/>
         <line num="7" count="12" type="stmt"/>
-        <line num="11" count="5" type="stmt"/>
-        <line num="15" count="6" type="stmt"/>
+        <line num="11" count="4" type="stmt"/>
+        <line num="15" count="5" type="stmt"/>
         <line num="22" count="5" type="stmt"/>
       </file>
       <file name="db.js" path="D:\Downloads\Std_API\db.js">
@@ -239,8 +239,8 @@
         <line num="8" count="1" type="stmt"/>
         <line num="13" count="7" type="stmt"/>
         <line num="14" count="7" type="stmt"/>
-        <line num="15" count="6" type="stmt"/>
-        <line num="17" count="1" type="stmt"/>
+        <line num="15" count="5" type="stmt"/>
+        <line num="17" count="2" type="stmt"/>
         <line num="24" count="6" type="stmt"/>
         <line num="25" count="7" type="cond" truecount="2" falsecount="0"/>
         <line num="26" count="1" type="stmt"/>

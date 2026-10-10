@@ -8,8 +8,16 @@ const { graphqlHTTP } = require("express-graphql");
 const schema = require("./schema");
 const root = require("./resolvers");
 const pool = require("./db");
+const { redisClient } = require("./cache");
 const { parsePagination, parseSort } = require("./middlewares/query-parser");
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("js-yaml");
+const fs = require("fs");
+const path = require("path");
 
+const openapiDocument = YAML.load(
+  fs.readFileSync(path.join(__dirname, "openapi.yaml"), "utf8"),
+);
 
 const app = express();
 
@@ -52,6 +60,10 @@ app.use(
     graphiql: true, // เปิดใช้งานหน้าทดสอบ GraphiQL ผ่านเบราว์เซอร์
   }),
 );
+
+// ─── Swagger UI ──────────────────────────────────────────────────────────────
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiDocument));
+
 // ─── Routes ──────────────────────────────────────────────────────────────────
 
 // Health check
