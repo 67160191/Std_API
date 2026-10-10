@@ -241,47 +241,69 @@ app.post("/api/v1/students/:id/enrollments", async (req, res, next) => {
 });
 
 // PUT: แก้ไขข้อมูลนักศึกษาทั้งระเบียน
-app.put("/api/v1/students/:id", (req, res) => {
+app.put("/api/v1/students/:id", async (req, res, next) => {
   const id = Number(req.params.id);
   const { name, major } = req.body;
-  const student = students.find((s) => s.id === id);
-
-  if (!student) {
-    return res.status(404).json({
-      error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
-    });
-  }
 
   if (!name || !major) {
     return res.status(400).json({
-      error: { code: "VALIDATION_ERROR", message: "กรุณาระบุ name และ major ให้ครบถ้วน" },
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "กรุณาระบุ name และ major ให้ครบถ้วน",
+      },
     });
   }
 
-  student.name = name;
-  student.major = major;
+  try {
+    const [result] = await pool.query(
+      "UPDATE students SET name = ?, major = ? WHERE id = ?",
+      [name, major, id],
+    );
 
-  res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: student });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
+      });
+    }
+
+    const [rows] = await pool.query("SELECT * FROM students WHERE id = ?", [id]);
+    res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: rows[0] });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // PATCH: แก้ไขข้อมูลนักศึกษาบางฟิลด์
-app.patch("/api/v1/students/:id", (req, res) => {
+app.patch("/api/v1/students/:id", async (req, res, next) => {
   const id = Number(req.params.id);
-  const student = students.find((s) => s.id === id);
-
-  if (!student) {
-    return res.status(404).json({
-      error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
-    });
-  }
-
-  // อัปเดตเฉพาะฟิลด์ที่ส่งมา ฟิลด์อื่นคงค่าเดิมไว้
   const { name, major, email } = req.body;
-  if (name !== undefined) student.name = name;
-  if (major !== undefined) student.major = major;
-  if (email !== undefined) student.email = email;
 
-  res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: student });
+  try {
+    const [existing] = await pool.query("SELECT * FROM students WHERE id = ?", [
+      id,
+    ]);
+
+    if (existing.length === 0) {
+      return res.status(404).json({
+        error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
+      });
+    }
+
+    const student = existing[0];
+    const updatedName = name !== undefined ? name : student.name;
+    const updatedMajor = major !== undefined ? major : student.major;
+    const updatedEmail = email !== undefined ? email : student.email;
+
+    await pool.query(
+      "UPDATE students SET name = ?, major = ?, email = ? WHERE id = ?",
+      [updatedName, updatedMajor, updatedEmail, id],
+    );
+
+    const [rows] = await pool.query("SELECT * FROM students WHERE id = ?", [id]);
+    res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: rows[0] });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // DELETE: ลบข้อมูลนักศึกษา
