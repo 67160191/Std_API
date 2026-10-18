@@ -271,7 +271,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"นักศึกษา ทดสอบ\",\n  \"major\": \"วิทยาการคอมพิวเตอร์\",\n  \"email\": \"{{studentEmail}}\"\n}",
+              "raw": "{\n  \"name\": \"นักศึกษา ทดสอบ\",\n  \"major\": \"วิทยาการคอมพิวเตอร์\",\n  \"email\": \"{{studentEmail}}\",\n  \"age\": 20,\n  \"studentType\": \"local\",\n  \"nationalId\": \"1234567890123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

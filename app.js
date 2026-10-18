@@ -51,6 +51,11 @@ app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));
 app.use(requireJson); // ตรวจสอบ Content-Type สำหรับ request ที่มี body
 
+// ─── Rate Limiters ───────────────────────────────────────────────────────────
+const { authLimiter, generalLimiter } = require("./middlewares/rateLimiter");
+app.set("trust proxy", 1);
+app.use(generalLimiter);
+
 // ─── GraphQL ─────────────────────────────────────────────────────────────────
 app.use(
   "/graphql",
@@ -137,6 +142,7 @@ app.use("/api/v2", v2Router);
 
 const studentsRouter = require("./routes/students");
 app.use("/api/v1/students", studentsRouter);
+app.use("/students", studentsRouter);
 
 
 app.get("/api/v1/students/:id", async (req, res, next) => {
@@ -377,6 +383,9 @@ app.post("/api/v1/auth/register", async (req, res, next) => {
     next(err);
   }
 });
+
+app.use("/api/v1/auth/login", authLimiter);
+app.use("/auth/login", authLimiter);
 
 app.post("/api/v1/auth/login", async (req, res, next) => {
   const { email, password } = req.body;

@@ -1,0 +1,12 @@
+{
+  "name": "student-service",
+  "version": "1.0.0",
+  "description": "Student Microservice running independently on port 4001",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

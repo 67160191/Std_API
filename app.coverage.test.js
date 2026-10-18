@@ -1,4 +1,4 @@
-﻿/**
+/**
  * app.coverage.test.js
  * เป้าหมาย: ดัน coverage ของ app.js ให้เกิน 70% ในทุก metric
  * ใช้ jest.mock สำหรับ db และ cache เพื่อไม่ต้องต่อ dependency จริง
@@ -179,7 +179,14 @@ describe("POST /api/v1/students", () => {
 
     const res = await request(app)
       .post("/api/v1/students")
-      .send({ name: "Charlie", major: "IT", email: "charlie@test.com" });
+      .send({
+        name: "Charlie",
+        major: "IT",
+        email: "charlie@test.com",
+        age: 20,
+        studentType: "local",
+        nationalId: "1234567890123",
+      });
 
     expect(res.status).toBe(201);
     expect(res.body.data.id).toBe(10);
@@ -194,13 +201,50 @@ describe("POST /api/v1/students", () => {
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
   });
 
+  test("ควรคืน 400 เมื่อ studentType=international แต่ไม่ระบุ passportNumber", async () => {
+    const res = await request(app)
+      .post("/api/v1/students")
+      .send({
+        name: "John Smith",
+        email: "john@example.com",
+        age: 22,
+        studentType: "international",
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    expect(res.body.error.details[0].field).toBe("passportNumber");
+  });
+
+  test("ควรคืน 400 เมื่อ studentType=local แต่ไม่ระบุ nationalId", async () => {
+    const res = await request(app)
+      .post("/api/v1/students")
+      .send({
+        name: "Somchai",
+        email: "somchai@example.com",
+        age: 20,
+        studentType: "local",
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+    expect(res.body.error.details[0].field).toBe("nationalId");
+  });
+
   test("ควรคืน 409 เมื่อ email ซ้ำ (ER_DUP_ENTRY)", async () => {
     const dupErr = Object.assign(new Error("Duplicate"), { code: "ER_DUP_ENTRY" });
     pool.query.mockRejectedValueOnce(dupErr);
 
     const res = await request(app)
       .post("/api/v1/students")
-      .send({ name: "Dave", major: "CS", email: "dup@test.com" });
+      .send({
+        name: "Dave",
+        major: "CS",
+        email: "dup@test.com",
+        age: 21,
+        studentType: "local",
+        nationalId: "1234567890124",
+      });
 
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe("DUPLICATE_EMAIL");
@@ -211,7 +255,14 @@ describe("POST /api/v1/students", () => {
 
     const res = await request(app)
       .post("/api/v1/students")
-      .send({ name: "Eve", major: "CS", email: "eve@test.com" });
+      .send({
+        name: "Eve",
+        major: "CS",
+        email: "eve@test.com",
+        age: 22,
+        studentType: "local",
+        nationalId: "1234567890125",
+      });
 
     expect(res.status).toBe(500);
   });
