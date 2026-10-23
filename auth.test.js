@@ -1,3 +1,33 @@
+jest.mock("./db", () => {
+  const users = [];
+  let nextId = 1;
+  return {
+    query: jest.fn(async (sql, params) => {
+      if (
+        sql.includes("SELECT id FROM users WHERE email = ?") ||
+        sql.includes("SELECT * FROM users WHERE email = ?")
+      ) {
+        const email = params[0];
+        const found = users.filter((u) => u.email === email);
+        return [found];
+      }
+      if (sql.includes("INSERT INTO users")) {
+        const [email, password_hash] = params;
+        if (users.some((u) => u.email === email)) {
+          const err = new Error("Duplicate entry");
+          err.code = "ER_DUP_ENTRY";
+          throw err;
+        }
+        const newUser = { id: nextId++, email, password_hash, role: "student" };
+        users.push(newUser);
+        return [{ insertId: newUser.id }];
+      }
+      return [[]];
+    }),
+    end: jest.fn().mockResolvedValue(),
+  };
+});
+
 const request = require("supertest");
 const app = require("./app");
 const pool = require("./db");
